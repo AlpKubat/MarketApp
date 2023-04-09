@@ -1,4 +1,4 @@
 import MarketFunctions
 
 
-MarketFunctions.showProductList()
+MarketFunctions.mainScreen()
