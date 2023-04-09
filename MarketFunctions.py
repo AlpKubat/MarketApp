@@ -1,6 +1,6 @@
 import csv
 
-PRODUCT_CSV = "Product.csv"
+PRODUCT_CSV = "Products.csv"
 USERS_CSV = "Users.csv"
 
 authLoginStatus = False
@@ -52,5 +52,15 @@ def signIn():
 
             if(not authLoginStatus):
                 print("Wrong UserName or Password please Enter again!!\n")
+
+
+def showProductList():
+
+    with open(PRODUCT_CSV,"r") as product_file:
+        productDics = csv.DictReader(product_file)
+
+        print("Name \t Price \t Amount")
+        for line in productDics:
+            print(line["Name"],"\t",line["Price"],"\t",line["Amount"])
                 
 
