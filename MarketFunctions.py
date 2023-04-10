@@ -2,6 +2,7 @@ import csv
 
 PRODUCT_CSV = "Products.csv"
 USERS_CSV = "Users.csv"
+BILLS_CSV = "Bills.csv"
 
 authLoginStatus = False
 authName = ""
@@ -22,6 +23,9 @@ def mainScreen():
 
     if(decision == "1"):
         signIn()
+        if(authLoginStatus):
+            buyProduct()
+        
 
     elif(decision == "2"):
         signUpForCustomer()
@@ -48,9 +52,11 @@ def signIn():
                     authName = line["Name"]
                     authSurname = line["Surname"]
                     authAuthority = line["Authority"]
+                    return True
 
             if(not authLoginStatus):
                 print("Wrong UserName or Password please Enter again!!\n")
+
 
 
 def showProductList():
@@ -94,6 +100,108 @@ def signUpForCustomer():
         userwriter.writeheader()
         for line in dics:
             userwriter.writerow(line)
+
+
+def takeOrder():
+    orderName = input("Please Enter product name = ").capitalize()
+    return orderName
+
+
+def totalPrice(dicarr):
+    totalPrice = 0.0
+    for order in dicarr:
+        totalPrice += order["Price"]
+    return totalPrice
+
+
+def displayBill(bill):
+    print(authName,authSurname,"your bill is:")
+    print("Name \t Amount \t Price\n")
+    for line in bill:
+        print(line["Name"],"\t",line["Amount"],"\t",line["Price"])
+    print("\nTotal cost = ",totalPrice(bill))
+
+
+def buyProduct():
+
+    if(not authLoginStatus):
+        print("You are not logged in! please sign in")
+        if(signIn()):
+            buyProduct()
+    
+    if(authAuthority != 1):
+        print("Please login with customer account!")
+        if(signIn()):
+            buyProduct()
+
+    showProductList()
+
+    with open(PRODUCT_CSV,"r", encoding = "utf-8") as product_file:
+        productReader = csv.DictReader(product_file)
+
+        productNames = []
+        products = []
+        bill = {}
+        for line in productReader:
+            productNames.append(line["Name"])
+            products.append(line)
+
+    
+    print("To exit Enter 'Q', To Display Bill Enter 'Bill'\n")
+    orderName = takeOrder()
+
+    cart = []
+
+    while(orderName != "Q"):
+
+        if(orderName == "Bill"):
+            displayBill(cart)
+            orderName = takeOrder()
+            continue
+
+        elif(orderName not in productNames):
+            print("Given Product name does not exist Please enter again = ")
+            orderName = input("")
+            continue
+        
+        orderAmount = float(input("Please enter amount of order = "))
+
+        for product in products:
+            if(product["Name"] == orderName):
+                while(orderAmount > float(product["Amount"]) or orderAmount < 0):
+                    print("to buy another product please enter '0'")
+                    orderAmount = float(input("you entered amount wrong!\n Please enter Again = "))
+                break
+        if(orderAmount == 0):
+            orderName = takeOrder()
+            continue
+        
+
+        for product in products:
+            if(product["Name"] == orderName):
+                orderPiece = product.copy()
+                orderPiece["Amount"] = orderAmount
+                orderPiece["Price"] = float(orderPiece["Price"]) * orderAmount
+                product["Amount"] = float(product["Amount"]) - orderAmount
+                cart.append(orderPiece)
+
+        orderName = takeOrder()
+
+    if(len(cart) < 1):
+        print("you are not buying anything! You are directing to MainMenu")
+        mainScreen()
+        return
+    
+    displayBill(cart)
+
+    
+                
+
+        
+
+
+
+
 
 
 
